@@ -17,7 +17,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.Key;
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
 import org.slf4j.Logger;
@@ -97,12 +96,13 @@ public class JwtUtil {
 		addJwtToHeader(AUTHORIZATION_HEADER, "", response);
 	}
 
-	public void issueTokens(User user, HttpServletResponse response, int refreshTokenExpireTime) {
+	public String issueTokens(User user, HttpServletResponse response) {
 		String accessToken = createAccessToken(user.getUsername(), user.getUserRole());
 		String refreshToken = createRefreshToken(user.getUsername());
 
 		addJwtToHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken, response);
 		addRefreshTokenCookie(response, refreshToken);
+		return accessToken;
 	}
 
 	public String getTokenFromHeader(String headerName, HttpServletRequest request) {
