@@ -36,16 +36,16 @@ public class JwtUtil {
 	private static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
 
 	@Value("${jwt.secret.key}")
-	private String secretKey;
+	String secretKey;
 
 	@Value("${jwt.access-expire-time}")
-	private long accessTokenExpireTime;
+	long accessTokenExpireTime;
 
 	@Value("${jwt.refresh-expire-time}")
-	private long refreshTokenExpireTime;
+	long refreshTokenExpireTime;
 
 	private Key key;
-	private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+	final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
 	@PostConstruct
 	public void init() {
