@@ -86,4 +86,57 @@ public class UserServiceImplTest {
 		GlobalException exception = assertThrows(GlobalException.class, () -> userService.signUp(signUpRequestDto));
 		assertEquals(ErrorCode.ALREADY_USERNAME, exception.getErrorCode());
 	}
+
+	@Test
+	@DisplayName("로그인 성공 테스트 코드")
+	void login_Success() {
+		// given
+		LoginRequestDto loginRequestDto = new LoginRequestDto("testuser", "password");
+		User user = User.builder()
+			.username("testuser")
+			.password("encodedPassword")
+			.userRole(UserRole.USER)
+			.build();
+
+		given(userRepository.findByUsername(loginRequestDto.getUsername())).willReturn(Optional.of(user));
+		given(passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())).willReturn(true);
+		given(jwtUtil.issueTokens(any(User.class), any(HttpServletResponse.class))).willReturn("token");
+
+		// when
+		String token = userService.login(loginRequestDto, mock(HttpServletResponse.class));
+
+		// then
+		assertNotNull(token);
+		assertEquals("token", token);
+	}
+
+	@Test
+	@DisplayName("존재하지 않는 사용자명으로 로그인 시도시 예외 발생")
+	void login_NotFoundUsername() {
+		// given
+		LoginRequestDto loginRequestDto = new LoginRequestDto("testuser", "password");
+		given(userRepository.findByUsername(loginRequestDto.getUsername())).willReturn(Optional.empty());
+
+		// when & then
+		GlobalException exception = assertThrows(GlobalException.class, () -> userService.login(loginRequestDto, mock(HttpServletResponse.class)));
+		assertEquals(ErrorCode.NOT_FOUND_USERNAME, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("잘못된 비밀번호로 로그인을 시도시 예외 발생")
+	void login_validateUserPassword() {
+		// given
+		LoginRequestDto loginRequestDto = new LoginRequestDto("testuser", "password");
+		User user = User.builder()
+			.username("testuser")
+			.password("encodedPassword")
+			.userRole(UserRole.USER)
+			.build();
+		given(userRepository.findByUsername(loginRequestDto.getUsername())).willReturn(Optional.of(user));
+		given(passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())).willReturn(false);
+
+		// when & then
+		GlobalException exception = assertThrows(GlobalException.class, () -> userService.login(loginRequestDto, mock(HttpServletResponse.class)));
+		assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
+	}
 }
