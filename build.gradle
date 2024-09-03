@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+    // H2
+    implementation 'com.h2database:h2'
     // security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
